@@ -1,40 +1,75 @@
 import streamlit as st
 from app.rag import ask_archmind
 
-st.set_page_config(page_title="ArchMind", page_icon="🦊")
-st.title("🦊 ArchMind - Assistente Técnico")
+st.set_page_config(page_title="ArchMind", page_icon="🦊", layout="centered")
 
-st.markdown("Faça perguntas sobre a documentação técnica do projeto.")
+# ==================== CSS CUSTOMIZADO ====================
+st.markdown("""
+<style>
+    .stChatMessage {
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+    }
+    .stChatInputContainer {
+        padding-top: 10px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# Histórico de conversa
+# ==================== SIDEBAR ====================
+with st.sidebar:
+    st.title("🦊 ArchMind")
+    st.markdown("**Assistente Técnico Inteligente**")
+    st.divider()
+
+    st.markdown("### 📌 Sobre o Projeto")
+    st.markdown("""
+    ArchMind é um assistente baseado em **RAG (Retrieval-Augmented Generation)** 
+    que responde perguntas utilizando a documentação técnica do projeto.
+    """)
+
+    st.divider()
+    st.markdown("### 🛠️ Tecnologias")
+    st.markdown("- Python + FastAPI\n- LangChain + Chroma\n- Ollama (Llama 3.1)\n- Streamlit")
+
+    st.divider()
+    st.caption("Desenvolvido por Gabriel Alves • 2026")
+
+# ==================== CABEÇALHO ====================
+st.title("🦊 ArchMind")
+st.markdown("**Assistente Técnico com Memória de Conversa**")
+st.caption("Faça perguntas sobre arquitetura, deploy, segurança e tecnologias do projeto.")
+
+st.divider()
+
+# ==================== HISTÓRICO ====================
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Mostrar histórico
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    avatar = "🧑‍💻" if message["role"] == "user" else "🦊"
+    with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
-# Input do usuário
-if prompt := st.chat_input("Digite sua pergunta..."):
-    # Adiciona mensagem do usuário no histórico
+# ==================== INPUT ====================
+if prompt := st.chat_input("Digite sua pergunta técnica..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar="🧑‍💻"):
         st.markdown(prompt)
 
-    # Chama o ArchMind
-    with st.chat_message("assistant"):
-        with st.spinner("Pensando..."):
+    with st.chat_message("assistant", avatar="🦊"):
+        with st.spinner("Consultando base de conhecimento..."):
             resultado = ask_archmind(prompt)
-            resposta = resultado["answer"]
-            fontes = resultado["sources"]
+            answer = resultado["answer"]
+            sources = resultado.get("sources", [])
 
-            # Monta a resposta final
-            resposta_completa = resposta
-            if fontes:
-                resposta_completa += "\n\n**Fontes:**\n" + "\n".join([f"- {f}" for f in fontes])
+            resposta = answer
+            if sources:
+                resposta += "\n\n**📚 Fontes consultadas:**\n"
+                for s in sources:
+                    resposta += f"- `{s}`\n"
 
-            st.markdown(resposta_completa)
+            st.markdown(resposta)
 
-    # Adiciona resposta do assistente no histórico
-    st.session_state.messages.append({"role": "assistant", "content": resposta_completa})
+    st.session_state.messages.append({"role": "assistant", "content": resposta})

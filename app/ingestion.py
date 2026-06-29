@@ -114,5 +114,13 @@ def ingest_directory(directory: Path = DATA_DIRECTORY) -> None:
 
 
 if __name__ == "__main__":
-    logger.info("=== ArchMind Enterprise Ingestion Pipeline ===")
-    ingest_directory()
+    try:
+        print("=== ArchMind Enterprise Ingestion Pipeline ===")
+        ingest_directory()
+        print("✅ Ingestão concluída com sucesso!")
+
+    except FileNotFoundError:
+        print("❌ Erro: Diretório de dados não encontrado.")
+
+    except Exception as e:
+        print(f"❌ Erro inesperado: {e}")

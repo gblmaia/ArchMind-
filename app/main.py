@@ -1,12 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import logging
 
-# Importa a configuração de logs
 from app.logging_config import setup_logging
 from app.rag import ask_archmind
 
-# Configura o logging
 logger = setup_logging()
 
 app = FastAPI(title="ArchMind API", version="1.0")
@@ -19,6 +17,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
     sources: list[str] = []
+    error: bool = False
 
 
 @app.get("/")
@@ -33,16 +32,17 @@ def chat(request: ChatRequest):
     try:
         resultado = ask_archmind(request.question)
 
-        logger.info("Resposta gerada com sucesso")
-
         return ChatResponse(
             answer=resultado["answer"],
-            sources=resultado["sources"]
+            sources=resultado.get("sources", []),
+            error=False
         )
 
     except Exception as e:
         logger.error(f"Erro ao processar pergunta: {str(e)}")
+
         return ChatResponse(
-            answer="Desculpe, ocorreu um erro ao processar sua pergunta.",
-            sources=[]
+            answer="Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente mais tarde.",
+            sources=[],
+            error=True
         )
