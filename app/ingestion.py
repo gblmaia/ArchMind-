@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 import os
 from typing import List, Optional
+from config import settings
 
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import PyPDFLoader
@@ -15,8 +16,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 EMBEDDING_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
 CHUNK_SIZE: int = 1000
 CHUNK_OVERLAP: int = 150
-PERSIST_DIRECTORY: str = "./chroma_db"
-DATA_DIRECTORY: Path = Path(os.getcwd()) / "data" / "docs"
+PERSIST_DIRECTORY: Path = settings.PERSIST_DIRECTORY
+DATA_DIRECTORY: Path = settings.DATA_DIRECTORY
 # Configuração de Logging
 logging.basicConfig(
     level=logging.INFO,
@@ -51,9 +52,9 @@ def ingest_single_pdf(file_path: Path, vectorstore: Optional[Chroma] = None) -> 
 
         # 2. Chunking
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=CHUNK_SIZE,
-            chunk_overlap=CHUNK_OVERLAP,
-            add_start_index=True,           # rastreabilidade
+            chunk_size=settings.CHUNK_SIZE,
+            chunk_overlap=settings.CHUNK_OVERLAP,
+            add_start_index=True,
             separators=["\n\n", "\n", ". ", " ", ""]
         )
         chunks = text_splitter.split_documents(documents)

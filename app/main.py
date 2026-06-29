@@ -4,11 +4,14 @@ import logging
 
 from app.logging_config import setup_logging
 from app.rag import ask_archmind
+from config import settings   # ← Import adicionado
 
 logger = setup_logging()
 
-app = FastAPI(title="ArchMind API", version="1.0")
-
+app = FastAPI(
+    title=settings.APP_TITLE,
+    version=settings.APP_VERSION
+)
 
 class ChatRequest(BaseModel):
     question: str

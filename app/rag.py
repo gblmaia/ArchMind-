@@ -6,13 +6,17 @@ from langchain_classic.chains import create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
+from config import settings   # ← Import adicionado
+
 # ==================== CONFIGURAÇÕES ====================
-embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-llm = OllamaLLM(model="llama3.1", temperature=0)
+embedding_model = HuggingFaceEmbeddings(model_name=settings.EMBEDDING_MODEL)
+llm = OllamaLLM(model=settings.LLM_MODEL, temperature=settings.LLM_TEMPERATURE)
 
-vector_db = Chroma(persist_directory="./chroma_db", embedding_function=embedding_model)
+vector_db = Chroma(
+    persist_directory=str(settings.PERSIST_DIRECTORY),
+    embedding_function=embedding_model
+)
 retriever = vector_db.as_retriever(search_kwargs={"k": 5})
-
 # ==================== PROMPT  ====================
 prompt = ChatPromptTemplate.from_template("""
 Você é um engenheiro de software sênior com vasta experiência em arquitetura e boas práticas.
