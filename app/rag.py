@@ -37,18 +37,25 @@ qa_chain = create_retrieval_chain(retriever, document_chain)
 # ==================== FUNÇÃO PRINCIPAL ====================
 def ask_archmind(question: str) -> dict:
     """
-    Função que recebe uma pergunta e retorna a resposta do RAG.
+    Função que recebe uma pergunta e retorna a resposta do RAG
+    com fontes limpas e sem duplicatas.
     """
     resposta = qa_chain.invoke({"input": question})
 
-    # Extrai as fontes dos documentos recuperados
-    sources = []
+    # Extrai as fontes e remove duplicatas
+    fontes_unicas = set()
+
     if "context" in resposta:
         for doc in resposta["context"]:
+            # Pega o nome do arquivo (source) do metadata
             source = doc.metadata.get("source", "desconhecido")
-            sources.append(source)
+
+            # Extrai só o nome do arquivo (sem o caminho completo)
+            nome_arquivo = source.split("/")[-1] if "/" in source else source.split("\\")[-1]
+
+            fontes_unicas.add(nome_arquivo)
 
     return {
         "answer": resposta["answer"],
-        "sources": sources
+        "sources": list(fontes_unicas)  # Converte de set para lista
     }
